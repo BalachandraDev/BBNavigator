@@ -1,0 +1,16 @@
+Patient Registration Module
+The Patient Registration page is used by front-desk staff to register a new patient.
+Fields: Full name, Date of birth, Gender, Phone number, National ID.
+Validations: Full name is mandatory. Date of birth cannot be in the future. Phone number must contain exactly 10 digits. National ID must be unique across all patients.
+Business rule: A duplicate patient is blocked when the National ID already exists.
+Roles: Front-desk staff can create and edit registrations. Doctors can only view them.
+After saving, the user is taken to the Appointment Booking page.Appointment Booking Module
+The Appointment Booking page lets front-desk staff book a visit for a registered patient.
+Fields: Patient, Department, Doctor, Appointment date, Time slot.
+Validations: Appointment date cannot be in the past. A doctor cannot be booked twice for the same time slot. Department is mandatory.
+Business rule: Appointments can be cancelled up to 2 hours before the time slot.
+Workflow - Outpatient visit: 1. Register patient. 2. Book appointment. 3. Doctor consultation. 4. Generate invoice.Billing Module
+The Invoice page is generated after a consultation is completed.
+Validations: Discount cannot exceed 20 percent of the invoice total. Payment mode is mandatory.
+Business rule: Only users with the Billing Manager role can approve a discount.
+Roles: Billing Manager can approve discounts and issue refunds. Front-desk staff can only collect payments.

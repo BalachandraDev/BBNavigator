@@ -1,0 +1,107 @@
+/* BBNavigator design tokens. Every colour, size, radius, shadow and timing used anywhere comes from here. */
+
+@font-face { font-family: "Geist"; src: url("../fonts/geist-latin-wght-normal.woff2") format("woff2"); font-weight: 100 900; font-style: normal; font-display: swap; }
+@font-face { font-family: "Geist Mono"; src: url("../fonts/geist-mono-latin-wght-normal.woff2") format("woff2"); font-weight: 100 900; font-style: normal; font-display: swap; }
+
+:root {
+  /* type */
+  --font: "Geist", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-mono: "Geist Mono", ui-monospace, "Cascadia Code", Consolas, monospace;
+  --fs-xs: .75rem;      /* 12 */
+  --fs-sm: .8125rem;    /* 13 */
+  --fs-base: .875rem;   /* 14 */
+  --fs-md: 1rem;        /* 16 */
+  --fs-lg: 1.125rem;    /* 18 */
+  --fs-xl: 1.375rem;    /* 22 */
+  --fs-2xl: 1.75rem;    /* 28 */
+  --lh-tight: 1.25; --lh-base: 1.5; --lh-read: 1.7;
+
+  /* space (4 px grid) */
+  --s-1: 4px; --s-2: 8px; --s-3: 12px; --s-4: 16px; --s-5: 20px; --s-6: 24px; --s-8: 32px; --s-10: 40px; --s-12: 48px;
+
+  /* radius */
+  --r-xs: 4px; --r-sm: 6px; --r-md: 8px; --r-lg: 12px; --r-xl: 16px; --r-pill: 999px;
+
+  /* motion */
+  --ease: cubic-bezier(.2, .7, .2, 1);
+  --t-fast: 120ms; --t-base: 180ms; --t-slow: 260ms;
+
+  /* sizes */
+  --h-sm: 32px; --h-md: 38px; --h-lg: 44px;
+  --sidebar-w: 256px; --sidebar-w-collapsed: 68px; --header-h: 56px; --content-max: 1240px;
+
+  /* layers */
+  --z-sidebar: 30; --z-header: 20; --z-menu: 60; --z-dialog: 80; --z-toast: 90;
+
+  /* brand */
+  --brand: #2459e6; --brand-hover: #1c47c4; --brand-press: #173a9f; --brand-ink: #ffffff;
+  --brand-tint: #ebf0ff; --brand-line: #c8d6fd; --brand-text: #1c47c4;
+  --focus: rgba(36, 89, 230, .35);
+
+  /* neutrals: light */
+  --bg: #f4f6f9; --surface: #ffffff; --surface-2: #f8fafc; --surface-3: #eef2f7; --surface-hover: #f1f5f9;
+  --line: #e3e8ef; --line-strong: #cdd6e2;
+  --text: #0f172a; --text-2: #334155; --muted: #5b6b80; --faint: #8493a7;
+
+  /* status: light */
+  --ok: #0a7a43;     --ok-tint: #e7f6ee;     --ok-line: #bde3cc;
+  --warn: #8f5200;   --warn-tint: #fff4dc;   --warn-line: #f1d79b;
+  --bad: #c0281b;    --bad-tint: #fdecea;    --bad-line: #f5c3be;
+  --info: #3d4f66;   --info-tint: #eef2f7;   --info-line: #d3dce8;
+  --review: #5b3fb8; --review-tint: #f0ecfd; --review-line: #d8cef9;
+
+  /* elevation */
+  --sh-xs: 0 1px 2px rgba(15, 23, 42, .05);
+  --sh-sm: 0 1px 3px rgba(15, 23, 42, .08), 0 1px 2px rgba(15, 23, 42, .04);
+  --sh-md: 0 8px 24px -6px rgba(15, 23, 42, .16), 0 2px 6px rgba(15, 23, 42, .06);
+  --sh-lg: 0 24px 60px -12px rgba(15, 23, 42, .28), 0 4px 12px rgba(15, 23, 42, .08);
+  --scrim: rgba(15, 23, 42, .5);
+
+  /* sidebar always a little deeper than the page */
+  --side-bg: #ffffff; --side-line: #e3e8ef; --side-text: #334155; --side-muted: #6b7a90; --side-hover: #f1f5f9; --side-active: #ebf0ff; --side-active-text: #1c47c4;
+
+  color-scheme: light;
+}
+
+/* dark: follows the device unless the person chose a theme with the toggle (data-theme, set by js/theme.js) */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --brand: #7a9cff; --brand-hover: #94b0ff; --brand-press: #a9c0ff; --brand-ink: #0a1230;
+    --brand-tint: #182446; --brand-line: #2c3f78; --brand-text: #9db8ff;
+    --focus: rgba(122, 156, 255, .4);
+    --bg: #0b0f15; --surface: #121821; --surface-2: #161d28; --surface-3: #1d2634; --surface-hover: #1a2230;
+    --line: #242d3b; --line-strong: #364257;
+    --text: #e8edf4; --text-2: #c2cddb; --muted: #94a2b5; --faint: #6b7a8f;
+    --ok: #4fd091;     --ok-tint: #10281e;     --ok-line: #1e4a36;
+    --warn: #f2bb5d;   --warn-tint: #2c2210;   --warn-line: #5a4318;
+    --bad: #ff8a7e;    --bad-tint: #321614;    --bad-line: #64302b;
+    --info: #aab8cb;   --info-tint: #1c2430;   --info-line: #2f3b4e;
+    --review: #b9a6ff; --review-tint: #221e44; --review-line: #3d3570;
+    --sh-xs: 0 1px 2px rgba(0, 0, 0, .4); --sh-sm: 0 1px 3px rgba(0, 0, 0, .5);
+    --sh-md: 0 10px 28px -6px rgba(0, 0, 0, .6), 0 2px 6px rgba(0, 0, 0, .4);
+    --sh-lg: 0 28px 70px -12px rgba(0, 0, 0, .75), 0 4px 12px rgba(0, 0, 0, .5);
+    --scrim: rgba(2, 5, 10, .66);
+    --side-bg: #0e131b; --side-line: #212a37; --side-text: #c2cddb; --side-muted: #8191a6; --side-hover: #161e2a; --side-active: #1a2547; --side-active-text: #9db8ff;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --brand: #7a9cff; --brand-hover: #94b0ff; --brand-press: #a9c0ff; --brand-ink: #0a1230;
+  --brand-tint: #182446; --brand-line: #2c3f78; --brand-text: #9db8ff;
+  --focus: rgba(122, 156, 255, .4);
+  --bg: #0b0f15; --surface: #121821; --surface-2: #161d28; --surface-3: #1d2634; --surface-hover: #1a2230;
+  --line: #242d3b; --line-strong: #364257;
+  --text: #e8edf4; --text-2: #c2cddb; --muted: #94a2b5; --faint: #6b7a8f;
+  --ok: #4fd091;     --ok-tint: #10281e;     --ok-line: #1e4a36;
+  --warn: #f2bb5d;   --warn-tint: #2c2210;   --warn-line: #5a4318;
+  --bad: #ff8a7e;    --bad-tint: #321614;    --bad-line: #64302b;
+  --info: #aab8cb;   --info-tint: #1c2430;   --info-line: #2f3b4e;
+  --review: #b9a6ff; --review-tint: #221e44; --review-line: #3d3570;
+  --sh-xs: 0 1px 2px rgba(0, 0, 0, .4); --sh-sm: 0 1px 3px rgba(0, 0, 0, .5);
+  --sh-md: 0 10px 28px -6px rgba(0, 0, 0, .6), 0 2px 6px rgba(0, 0, 0, .4);
+  --sh-lg: 0 28px 70px -12px rgba(0, 0, 0, .75), 0 4px 12px rgba(0, 0, 0, .5);
+  --scrim: rgba(2, 5, 10, .66);
+  --side-bg: #0e131b; --side-line: #212a37; --side-text: #c2cddb; --side-muted: #8191a6; --side-hover: #161e2a; --side-active: #1a2547; --side-active-text: #9db8ff;
+  color-scheme: dark;
+}
+:root[data-theme="light"] { color-scheme: light; }

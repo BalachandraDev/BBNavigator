@@ -1,0 +1,3 @@
+Discharge page
+Discharge date is mandatory.Summary page
+Printed after approval.

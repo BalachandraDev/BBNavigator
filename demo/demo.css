@@ -1,0 +1,28 @@
+/* Only the GitHub Pages demo loads this file. Uses the app's own design tokens. */
+
+/* A small tab hanging from the top edge, centred: it never covers a button, the composer or the page header's content. */
+.demo-pill {
+  position: fixed; top: 0; left: 50%; transform: translateX(-50%); z-index: 95;
+  display: inline-flex; align-items: center; gap: 6px;
+  max-width: calc(100vw - 24px); white-space: nowrap;
+  padding: 2px 4px 3px 12px;
+  background: var(--surface); color: var(--text-2);
+  border: 1px solid var(--line-strong); border-top: 0; border-radius: 0 0 var(--r-md) var(--r-md);
+  box-shadow: var(--sh-sm); font-size: 11px; line-height: 16px;
+}
+.demo-pill strong { color: var(--brand-text); letter-spacing: .06em; text-transform: uppercase; }
+.demo-pill button {
+  width: 18px; height: 18px; display: grid; place-items: center;
+  border: 0; border-radius: 50%; background: transparent; color: var(--muted);
+  font-size: 14px; line-height: 1; cursor: pointer;
+}
+.demo-pill button:hover { background: var(--surface-hover); color: var(--text); }
+.demo-pill button:focus-visible { outline: 2px solid var(--brand); outline-offset: 1px; }
+@media (max-width: 700px) { .demo-pill span { display: none; } .demo-pill { padding-left: 10px; } }
+
+/* The visitor chat page is a full-bleed layout: keep the label in the corner, small, clear of its header buttons. */
+.demo-pill-bot { left: 0; transform: none; padding: 0 6px 1px 8px; font-size: 10px; line-height: 14px; border-left: 0; border-radius: 0 0 var(--r-md) 0; }
+.demo-pill-bot span, .demo-pill-bot button { display: none; }
+
+.demo-quick { display: grid; gap: var(--s-3); margin-bottom: var(--s-4); }
+.demo-quick-row { display: flex; flex-wrap: wrap; gap: var(--s-2); }

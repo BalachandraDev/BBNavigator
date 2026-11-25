@@ -1,0 +1,20 @@
+# ONLY a PostgreSQL+pgvector database on localhost:5433, for running the API/Worker from source with `dotnet run`.
+# (For the whole system in Docker use docker-compose.yml instead.)  Start:  docker compose -f docker-compose.dev-db.yml up -d
+# Separate project name so it never touches the full stack's containers.
+name: flowmind-dev
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: flowmind-postgres
+    environment:
+      POSTGRES_DB: flowmind_vectors
+      POSTGRES_USER: flowmind
+      POSTGRES_PASSWORD: flowmind_dev_only   # development only
+    ports:
+      - "5433:5432"
+    volumes:
+      - flowmind_pg:/var/lib/postgresql/data
+      - ./db/postgres/001_init.sql:/docker-entrypoint-initdb.d/001_init.sql:ro
+volumes:
+  flowmind_pg:
+    name: flowmind_flowmind_pg   # keeps the data of the earlier dev container

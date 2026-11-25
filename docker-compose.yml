@@ -1,0 +1,140 @@
+# FlowMind, whole stack in Docker:  web app + API + worker + SQL Server + PostgreSQL/pgvector.
+#
+#   1. ./scripts/init-env.ps1          (creates .env with random secrets; add your AI keys to it)
+#   2. docker compose up -d --build
+#   3. open http://localhost:8080
+#
+# Nothing but the web app is published to your machine (databases stay inside Docker's private network).
+# Putting it on a real network: run a TLS reverse proxy in front of port 8080 (this stack speaks plain HTTP internally).
+
+x-app-env: &app-env
+  ConnectionStrings__SqlServer: "Server=sqlserver;Database=FlowMind;User Id=sa;Password=${SA_PASSWORD:?run scripts/init-env.ps1};TrustServerCertificate=True;MultipleActiveResultSets=true"
+  ConnectionStrings__Postgres: "Host=postgres;Database=flowmind_vectors;Username=flowmind;Password=${POSTGRES_PASSWORD:?run scripts/init-env.ps1}"
+  Storage__RootPath: /data
+  # Company admins choose where their files go in Settings > Storage. Only public https addresses are accepted unless you set this to true (needed for the local "minio" cloud below, or any server on your own network).
+  Storage__AllowPrivateEndpoints: ${STORAGE_ALLOW_PRIVATE:-false}
+  # "Folder on a server" in Settings > Storage. The api and worker containers see the folder /shared-docs: by default a Docker volume, or a real folder on this PC when STORAGE_HOST_FOLDER=D:/FlowMindDocs is set in .env.
+  # The platform admin approves /shared-docs once in the app (Companies > Server folders); a company admin may then choose that folder or any folder inside it.
+  # STORAGE_FOLDER_ROOT (below) is an optional extra location that is always allowed without that approval step.
+  # When FlowMind itself runs on IIS instead of Docker, set Storage__AllowedFolderRoots__0 to a Windows path such as D:\FlowMindDocs or \\fileserver\FlowMind.
+  Storage__AllowedFolderRoots__0: ${STORAGE_FOLDER_ROOT:-}
+  # E-mail for invitations and "Forgot password?" (optional). Empty = nothing is sent and admins copy the link from the Team page instead.
+  # Use your organisation's mail server, or any SMTP account you own (for Gmail / Outlook.com use an app password). Set these in .env.
+  Email__Host: ${EMAIL_HOST:-}
+  Email__Port: ${EMAIL_PORT:-587}
+  Email__User: ${EMAIL_USER:-}
+  Email__Password: ${EMAIL_PASSWORD:-}
+  Email__From: ${EMAIL_FROM:-}
+  Email__FromName: ${EMAIL_FROM_NAME:-BBNavigator}
+  Email__EnableSsl: ${EMAIL_SSL:-true}
+  # The address people type to reach FlowMind. Links in e-mails are built from it, for example https://flowmind.hospital.local
+  Accounts__PublicUrl: ${PUBLIC_URL:-}
+  # AI providers: every key and limit is optional. A limit of 0 (the default) keeps that feature switched off.
+  AiProviders__Gemini__ApiKey: ${GEMINI_API_KEY:-}
+  AiProviders__Gemini__DailyRequestLimit: ${GEMINI_DAILY_REQUEST_LIMIT:-0}
+  AiProviders__Gemini__RequestsPerMinute: ${GEMINI_REQUESTS_PER_MINUTE:-5}
+  AiProviders__Gemini__DailyTokenLimit: ${GEMINI_DAILY_TOKEN_LIMIT:-0}
+  # Tamil chat has its own caps inside the Gemini total (so it cannot use up what document analysis needs). 0 = no separate cap.
+  AiProviders__Gemini__ChatDailyRequestLimit: ${GEMINI_CHAT_DAILY_REQUEST_LIMIT:-150}
+  AiProviders__Gemini__ChatDailyTokenLimit: ${GEMINI_CHAT_DAILY_TOKEN_LIMIT:-300000}
+  AiProviders__Cloudflare__AccountId: ${CLOUDFLARE_ACCOUNT_ID:-}
+  AiProviders__Cloudflare__ApiToken: ${CLOUDFLARE_API_TOKEN:-}
+  AiProviders__Cloudflare__DailyNeuronLimit: ${CLOUDFLARE_DAILY_NEURON_LIMIT:-0}
+  AiProviders__Groq__ApiKey: ${GROQ_API_KEY:-}
+  AiProviders__Groq__DailyRequestLimit: ${GROQ_DAILY_REQUEST_LIMIT:-0}
+  AiProviders__Groq__RequestsPerMinute: ${GROQ_REQUESTS_PER_MINUTE:-10}
+  AiProviders__Groq__DailyTokenLimit: ${GROQ_DAILY_TOKEN_LIMIT:-0}
+  AiProviders__MistralOcr__ApiKey: ${MISTRAL_API_KEY:-}
+  AiProviders__MistralOcr__DailyPageLimit: ${MISTRAL_DAILY_PAGE_LIMIT:-0}
+
+services:
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    restart: unless-stopped
+    environment:
+      # By setting ACCEPT_EULA=Y you accept Microsoft's SQL Server licence terms.
+      # Express is free for production (10 GB per database); use MSSQL_PID=Developer for dev/test only.
+      ACCEPT_EULA: "Y"
+      MSSQL_PID: ${MSSQL_PID:-Express}
+      MSSQL_SA_PASSWORD: ${SA_PASSWORD:?run scripts/init-env.ps1}
+    volumes:
+      - sqldata:/var/opt/mssql
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -C -S localhost -U sa -P \"$$MSSQL_SA_PASSWORD\" -Q \"SELECT 1\" -b -o /dev/null"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+      start_period: 30s
+
+  postgres:
+    image: pgvector/pgvector:pg16
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: flowmind_vectors
+      POSTGRES_USER: flowmind
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?run scripts/init-env.ps1}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./db/postgres/001_init.sql:/docker-entrypoint-initdb.d/001_init.sql:ro   # enables pgvector and creates the search table
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U flowmind -d flowmind_vectors"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  api:
+    build: { context: ., target: api }
+    image: flowmind-api
+    restart: unless-stopped
+    depends_on:
+      sqlserver: { condition: service_healthy }
+      postgres: { condition: service_healthy }
+    environment:
+      <<: *app-env
+      Database__AutoMigrate: "true"            # creates/updates the SQL Server tables on startup
+      Auth__SigningKey: ${AUTH_SIGNING_KEY:?run scripts/init-env.ps1}
+      Auth__PlatformAdminKey: ${PLATFORM_ADMIN_KEY:?run scripts/init-env.ps1}
+      Security__RequireHttps: "false"          # TLS is terminated by the reverse proxy in front of this container
+      Security__SecretsKey: ${SECRETS_KEY:?run scripts/init-env.ps1}   # encrypts company keys so the platform admin can view them
+    ports:
+      - "${API_BIND:-127.0.0.1}:${API_PORT:-8080}:8080"   # API_BIND=0.0.0.0 in .env to reach it from your internal network
+    volumes:
+      - docs:/data
+      - ${STORAGE_HOST_FOLDER:-sharedfiles}:/shared-docs   # folder companies can choose in Settings > Storage
+
+  worker:
+    build: { context: ., target: worker }
+    image: flowmind-worker
+    restart: unless-stopped
+    depends_on:
+      api: { condition: service_healthy }      # the API has created the schema by the time it reports healthy
+    environment:
+      <<: *app-env
+    volumes:
+      - docs:/data                             # same folder as the API: the worker reads what the API stored
+      - ${STORAGE_HOST_FOLDER:-sharedfiles}:/shared-docs   # same shared folder as the API
+
+  # Optional "local cloud": an S3-compatible storage server (MinIO, free and open source) that keeps files on a disk you control.
+  # Start it with:  docker compose --profile cloud up -d minio      (needs MINIO_ROOT_USER and MINIO_ROOT_PASSWORD in .env)
+  # Then in Settings > Storage choose "S3-compatible", address http://minio:9000, and set STORAGE_ALLOW_PRIVATE=true in .env.
+  # The web console is on http://localhost:9001 (this PC only).
+  minio:
+    profiles: ["cloud"]
+    image: minio/minio:latest
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-flowmind}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-}
+    ports:
+      - "127.0.0.1:9000:9000"
+      - "127.0.0.1:9001:9001"
+    volumes:
+      - miniodata:/data
+
+volumes:
+  sqldata:
+  pgdata:
+  docs:
+  sharedfiles:
+  miniodata:

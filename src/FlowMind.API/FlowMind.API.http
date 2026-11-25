@@ -1,0 +1,6 @@
+@FlowMind.API_HostAddress = http://localhost:5189
+
+GET {{FlowMind.API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

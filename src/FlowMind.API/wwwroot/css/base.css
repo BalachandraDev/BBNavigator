@@ -1,0 +1,66 @@
+/* Reset, typography, focus, scrollbars, small utilities. */
+
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+html, body { height: 100%; }
+body {
+  margin: 0; background: var(--bg); color: var(--text);
+  font: 400 var(--fs-base)/var(--lh-base) var(--font); letter-spacing: -.003em;
+  -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; text-rendering: optimizeLegibility;
+}
+[hidden] { display: none !important; }
+
+h1, h2, h3, h4 { margin: 0; line-height: var(--lh-tight); font-weight: 650; letter-spacing: -.012em; color: var(--text); }
+h1 { font-size: var(--fs-2xl); }
+h2 { font-size: var(--fs-xl); }
+h3 { font-size: var(--fs-md); }
+h4 { font-size: var(--fs-base); }
+p { margin: 0 0 .6em; }
+a { color: var(--brand-text); text-decoration-thickness: 1px; text-underline-offset: 2px; }
+a:hover { color: var(--brand-hover); }
+strong, b { font-weight: 600; }
+small { font-size: var(--fs-xs); }
+hr { border: 0; border-top: 1px solid var(--line); margin: var(--s-4) 0; }
+img, svg { max-width: 100%; }
+button, input, select, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; }
+button:disabled { cursor: not-allowed; }
+
+code, pre, kbd, .mono { font-family: var(--font-mono); }
+code { font-size: .86em; background: var(--surface-3); border: 1px solid var(--line); padding: 1px 6px; border-radius: var(--r-sm); }
+kbd {
+  font-size: .72rem; line-height: 1; padding: 3px 6px; border-radius: var(--r-xs);
+  background: var(--surface-2); border: 1px solid var(--line-strong); border-bottom-width: 2px; color: var(--muted);
+}
+
+.muted { color: var(--muted); }
+.small { font-size: var(--fs-sm); }
+.num { font-variant-numeric: tabular-nums; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* Focus: one ring everywhere, visible for keyboard users only. */
+:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; border-radius: var(--r-sm); }
+:focus:not(:focus-visible) { outline: none; }
+
+::selection { background: color-mix(in srgb, var(--brand) 28%, transparent); }
+
+/* Scrollbars: thin and quiet. */
+* { scrollbar-width: thin; scrollbar-color: var(--line-strong) transparent; }
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-thumb { background: var(--line-strong); border: 3px solid transparent; background-clip: content-box; border-radius: var(--r-pill); }
+::-webkit-scrollbar-thumb:hover { background: var(--faint); background-clip: content-box; border: 3px solid transparent; }
+::-webkit-scrollbar-track { background: transparent; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; scroll-behavior: auto !important; }
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes rise { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+@keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes pop { from { opacity: 0; transform: translateY(8px) scale(.98); } to { opacity: 1; transform: none; } }
+@keyframes shimmer { to { background-position: -200% 0; } }
+@keyframes pulse { 0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--ok) 55%, transparent); } 70% { box-shadow: 0 0 0 7px transparent; } 100% { box-shadow: 0 0 0 0 transparent; } }
+@keyframes blink { 50% { opacity: 0; } }
+@keyframes bounce { 0%, 60%, 100% { transform: translateY(0); opacity: .45; } 30% { transform: translateY(-4px); opacity: 1; } }
