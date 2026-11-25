@@ -23,7 +23,10 @@ jobs:
         run: dotnet build --nologo -c Release
 
       # The tests use an in-memory database and fakes for every AI provider: no database, key or network is needed.
+      # Hundreds of in-process test servers each watch their config files; polling keeps the runner under Linux's inotify limit.
       - name: Test
+        env:
+          DOTNET_USE_POLLING_FILE_WATCHER: "true"
         run: dotnet test --nologo -c Release --no-build --logger "trx;LogFileName=results.trx"
 
       - name: Keep test results

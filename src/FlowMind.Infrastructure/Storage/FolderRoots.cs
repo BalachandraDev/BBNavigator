@@ -52,7 +52,7 @@ public sealed class FolderRoots
     private static bool IsSystemFolder(string full)
     {
         if (full.StartsWith(@"\\", StringComparison.Ordinal)) return false;                    // a file share: its own server decides
-        var parts = full.Split('\\', '/', StringSplitOptions.RemoveEmptyEntries);
+        var parts = full.Split(new[] { '\\', '/' }, StringSplitOptions.RemoveEmptyEntries);   // (a char array: Split('\\', '/', options) would read '/' as a count and split on '\' only, so Linux paths like /etc were never recognised)
         var first = parts.Skip(OperatingSystem.IsWindows() ? 1 : 0).FirstOrDefault();          // the first folder below the drive (or "/"), e.g. C:\Windows or /etc
         return first != null && SystemNames.Contains(first.ToLowerInvariant());
     }

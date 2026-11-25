@@ -47,7 +47,7 @@ public class FolderGuardTests : IDisposable
         var roots = new[] { _root };
         Assert.Contains("not in a location", Assert.IsType<string>(Check(Path.GetTempPath(), roots)));                                // the parent folder
         Assert.Contains("not in a location", Assert.IsType<string>(Check(_root + "-other", roots)));                                  // a sibling that merely starts with the same letters
-        Assert.Contains("not in a location", Assert.IsType<string>(Check(Path.GetFullPath(Path.Combine(Environment.SystemDirectory)), roots)));   // a system folder
+        Assert.Contains("not in a location", Assert.IsType<string>(Check(OperatingSystem.IsWindows() ? Path.GetFullPath(Environment.SystemDirectory) : "/etc", roots)));   // a system folder
     }
 
     [Theory]
